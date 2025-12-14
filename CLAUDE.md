@@ -254,11 +254,15 @@ User → Better Auth (frontend) → JWT token → Authorization header → FastA
 
 ### Key Implementation Patterns
 
-1. **JWT Verification** (backend)
+1. **JWT Verification** (backend) - Uses PyJWT with JWKS for EdDSA
    ```python
    # backend/app/dependencies/auth.py
-   from jose import jwt
-   payload = jwt.decode(token, settings.BETTER_AUTH_SECRET, algorithms=["HS256"])
+   import jwt
+   from jwt import PyJWKClient
+
+   jwks_client = PyJWKClient(f"{settings.AUTH_URL}/api/auth/jwks")
+   signing_key = jwks_client.get_signing_key_from_jwt(token)
+   payload = jwt.decode(token, signing_key.key, algorithms=["EdDSA"])
    user_id = payload.get("sub")
    ```
 
@@ -297,10 +301,12 @@ cd backend && pytest
 | Issue | Solution |
 |-------|----------|
 | JWT verification fails | Ensure BETTER_AUTH_SECRET is identical in both .env files |
+| `JWKError: Unable to find algorithm` | Use `PyJWT` + `PyNaCl` instead of `python-jose` (EdDSA support) |
 | Neon connection drops | Use `pool_pre_ping=True` in SQLAlchemy engine |
 | CORS errors | Backend CORS allows `http://localhost:3000` |
 | 401 on API calls | Check token is being attached via `api.setToken()` |
 | 403 on task operations | Verify user_id ownership in backend |
+| Node version issues | Better Auth CLI needs Node 20+; use `nvm use 20` |
 
 ### Spec References
 
@@ -309,3 +315,14 @@ cd backend && pytest
 - `@specs/api/rest-endpoints.md` - API contracts
 - `@specs/database/schema.md` - Database schema
 - `@specs/phase2-architecture-plan.md` - Full Phase 2 architecture
+
+---
+
+## Local Session Memory
+
+For session-specific context, status, and notes, see `CLAUDE.local.md` (git-ignored).
+This file contains:
+- Current project status
+- Quick start commands
+- Session history and debugging notes
+- Test credentials and commands

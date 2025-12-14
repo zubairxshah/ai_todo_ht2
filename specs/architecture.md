@@ -1,6 +1,6 @@
 # Todo P1 - Architecture
 
-## System Architecture
+## System Architecture (Phase I-II)
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -15,13 +15,91 @@
          │                      │
          ▼                      ▼
     Better Auth            JWT Verify
-    (Session Mgmt)         (python-jose)
+    (Session Mgmt)         (PyJWT + JWKS)
          │                      │
          └──────────────────────┘
                     │
                     ▼
-            Shared Secret
-          (BETTER_AUTH_SECRET)
+            EdDSA Keys (JWKS)
+```
+
+## Phase III Architecture (AI Chatbot + MCP)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              FRONTEND (Next.js)                               │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────────────────┐  │
+│  │  Task UI    │  │  Auth UI    │  │         Chat Interface              │  │
+│  │  (CRUD)     │  │  (Login)    │  │   ┌─────────────────────────────┐   │  │
+│  └──────┬──────┘  └──────┬──────┘  │   │   OpenAI ChatKit Component  │   │  │
+│         │                │         │   └─────────────┬───────────────┘   │  │
+│         └────────────────┴─────────┴─────────────────┼───────────────────┘  │
+│                                                      │                       │
+└──────────────────────────────────────────────────────┼───────────────────────┘
+                           │                           │
+                           │ REST API                  │ POST /api/chat
+                           ▼                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              BACKEND (FastAPI)                                │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │  /api/tasks     │  │  Auth Middleware │  │      /api/chat             │  │
+│  │  (CRUD Router)  │  │  (JWT Verify)    │  │  ┌─────────────────────┐   │  │
+│  └────────┬────────┘  └────────┬─────────┘  │  │  OpenAI Agents SDK  │   │  │
+│           │                    │            │  │  (Agent Runner)     │   │  │
+│           │                    │            │  └──────────┬──────────┘   │  │
+│           │                    │            │             │              │  │
+│           │                    │            │  ┌──────────▼──────────┐   │  │
+│           │                    │            │  │     MCP Server      │   │  │
+│           │                    │            │  │  ┌───────────────┐  │   │  │
+│           │                    │            │  │  │  add_task     │  │   │  │
+│           │                    │            │  │  │  list_tasks   │  │   │  │
+│           │                    │            │  │  │  complete_task│  │   │  │
+│           │                    │            │  │  │  update_task  │  │   │  │
+│           │                    │            │  │  │  delete_task  │  │   │  │
+│           │                    │            │  │  └───────────────┘  │   │  │
+│           │                    │            │  └──────────┬──────────┘   │  │
+│           └────────────────────┴────────────┴────────────┼───────────────┘  │
+│                                                          │                   │
+└──────────────────────────────────────────────────────────┼───────────────────┘
+                                                           │
+                                                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          DATABASE (Neon PostgreSQL)                           │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │     users       │  │     tasks       │  │  conversations / messages   │  │
+│  │  (Better Auth)  │  │   (user_id FK)  │  │      (user_id scoped)       │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Chat Request Flow
+
+```
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│  User   │    │ ChatKit │    │ FastAPI │    │  Agent  │    │   MCP   │
+│ Browser │    │   UI    │    │ /chat   │    │ Runner  │    │  Tools  │
+└────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘
+     │              │              │              │              │
+     │ "Add milk"   │              │              │              │
+     │─────────────▶│              │              │              │
+     │              │ POST /chat   │              │              │
+     │              │─────────────▶│              │              │
+     │              │              │ Verify JWT   │              │
+     │              │              │─────────────▶│              │
+     │              │              │              │              │
+     │              │              │ Run Agent    │              │
+     │              │              │─────────────▶│              │
+     │              │              │              │ call add_task│
+     │              │              │              │─────────────▶│
+     │              │              │              │              │
+     │              │              │              │    result    │
+     │              │              │              │◀─────────────│
+     │              │              │              │              │
+     │              │              │   response   │              │
+     │              │◀─────────────│◀─────────────│              │
+     │  "✅ Added"  │              │              │              │
+     │◀─────────────│              │              │              │
+     │              │              │              │              │
 ```
 
 ## Component Overview
@@ -108,9 +186,31 @@
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
+### Conversation Table (Phase III)
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | UUID | PRIMARY KEY |
+| user_id | VARCHAR | NOT NULL, INDEX |
+| title | VARCHAR(255) | NULL |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Message Table (Phase III)
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | UUID | PRIMARY KEY |
+| conversation_id | UUID | FK → conversation.id |
+| role | VARCHAR(20) | NOT NULL |
+| content | TEXT | NOT NULL |
+| tool_calls | JSONB | NULL |
+| metadata | JSONB | NULL |
+| created_at | TIMESTAMP | NOT NULL |
+
 ## API Design
 
-### Endpoints
+### Endpoints (Phase I-II)
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
@@ -119,6 +219,14 @@
 | POST | /api/tasks | Create task | Yes |
 | PATCH | /api/tasks/{id} | Update task | Yes |
 | DELETE | /api/tasks/{id} | Delete task | Yes |
+
+### Endpoints (Phase III - Chat)
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| POST | /api/chat | Send message to AI | Yes |
+| GET | /api/chat/history | Get conversation history | Yes |
+| DELETE | /api/chat/history | Clear conversation history | Yes |
 
 ### Authentication Header
 
@@ -165,6 +273,47 @@ Authorization: Bearer <jwt_token>
 
 ### Why Better Auth?
 - Modern auth solution
-- JWT plugin for stateless auth
+- JWT plugin for stateless auth (EdDSA)
 - Easy integration with Next.js
 - Session management built-in
+
+### Why OpenAI Agents SDK? (Phase III)
+- Native tool calling support
+- Streaming responses
+- Context management
+- Easy integration with MCP
+
+### Why MCP (Model Context Protocol)? (Phase III)
+- Standardized tool interface
+- Clean separation of concerns
+- Reusable across different LLM providers
+- User-scoped tool execution
+
+## Phase III Components
+
+### MCP Server
+
+The MCP server exposes task management tools to the AI agent:
+
+| Tool | Description |
+|------|-------------|
+| `add_task` | Create a new task |
+| `list_tasks` | List tasks with optional filters |
+| `complete_task` | Mark a task as completed |
+| `update_task` | Update a task's title |
+| `delete_task` | Delete a task |
+
+All tools automatically receive `user_id` from the authenticated session to ensure data isolation.
+
+### Agent Configuration
+
+```python
+SYSTEM_PROMPT = """
+You are a helpful todo assistant. You help users manage their tasks through natural conversation.
+You have access to tools that let you add, list, complete, update, and delete tasks.
+Always confirm actions you take and provide clear summaries.
+Be concise but friendly.
+"""
+```
+
+See [@specs/features/chatbot.md](./features/chatbot.md) for full agent behavior specification.
