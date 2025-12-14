@@ -1,0 +1,92 @@
+# SpecKit Configuration
+# Project-level settings for spec-driven development
+
+project:
+  name: "Todo P1"
+  description: "Full-stack Todo application with Next.js and FastAPI"
+  version: "1.0.0"
+
+# Directory structure
+paths:
+  specs: "specs"
+  features: "specs/features"
+  api: "specs/api"
+  database: "specs/database"
+  ui: "specs/ui"
+  history: "history"
+  prompts: "history/prompts"
+  adr: "history/adr"
+  templates: ".specify/templates"
+
+# Feature tracking
+features:
+  default_branch_prefix: ""
+  spec_file: "spec.md"
+  plan_file: "plan.md"
+  tasks_file: "tasks.md"
+
+# Prompt History Records (PHR)
+phr:
+  enabled: true
+  auto_create: true
+  stages:
+    - constitution
+    - spec
+    - plan
+    - tasks
+    - red
+    - green
+    - refactor
+    - explainer
+    - misc
+    - general
+
+# Architecture Decision Records (ADR)
+adr:
+  enabled: true
+  auto_suggest: true
+  directory: "history/adr"
+  template: ".specify/templates/adr-template.md"
+
+# Code quality settings
+quality:
+  typescript:
+    strict: true
+    no_any: true
+  python:
+    type_hints: required
+    style: pep8
+  testing:
+    required: true
+    coverage_threshold: 80
+
+# Tech stack reference
+stack:
+  frontend:
+    framework: "next.js"
+    version: "14.x"
+    language: "typescript"
+    styling: "tailwindcss"
+    auth: "better-auth"
+  backend:
+    framework: "fastapi"
+    language: "python"
+    orm: "sqlmodel"
+    database: "postgresql"
+    auth: "jwt"
+
+# Development settings
+development:
+  frontend_port: 3000
+  backend_port: 8000
+  database_url_env: "DATABASE_URL"
+  auth_secret_env: "BETTER_AUTH_SECRET"
+
+# Development phases
+phases:
+  - name: phase1-console
+    features: [task-crud]
+  - name: phase2-web
+    features: [task-crud, authentication]
+  - name: phase3-chatbot
+    features: [task-crud, authentication, chatbot]

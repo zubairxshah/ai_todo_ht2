@@ -1,0 +1,39 @@
+{
+  "name": "todo-p1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack Todo application with Next.js and FastAPI",
+  "scripts": {
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "cd backend && uvicorn app.main:app --reload",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint",
+    "test": "npm run test:backend",
+    "test:backend": "cd backend && pytest",
+    "install:frontend": "npm --prefix frontend install",
+    "install:backend": "cd backend && pip install -r requirements.txt",
+    "install:all": "npm run install:frontend && npm run install:backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "todo",
+    "nextjs",
+    "fastapi",
+    "typescript",
+    "python"
+  ],
+  "author": "",
+  "license": "MIT"
+}
