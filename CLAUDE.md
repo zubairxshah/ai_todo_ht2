@@ -318,6 +318,124 @@ cd backend && pytest
 
 ---
 
+## Phase 3 Learnings: AI Chatbot & Real-time Updates
+
+### Tech Stack Additions
+
+| Layer | Technology | Key Files |
+|-------|------------|-----------|
+| AI Chat | Claude/OpenAI + MCP Tools | `backend/app/agent/`, `backend/app/mcp/` |
+| Event System | Custom EventEmitter | `frontend/src/lib/task-events.ts` |
+| Notifications | TaskNotification component | `frontend/src/components/TaskNotification.tsx` |
+
+### Task Event System
+
+Real-time communication between ChatWidget and Dashboard when tasks are modified via AI chatbot.
+
+```typescript
+// frontend/src/lib/task-events.ts
+type TaskEventType = 'added' | 'completed' | 'updated' | 'deleted';
+
+// Emitting events (ChatWidget)
+taskEvents.taskAdded(taskId, taskTitle);
+taskEvents.taskCompleted(taskId, taskTitle);
+taskEvents.taskUpdated(taskId, taskTitle);
+taskEvents.taskDeleted(taskId, taskTitle);
+
+// Subscribing to events (Dashboard)
+useEffect(() => {
+  const unsubscribe = taskEvents.subscribe((event: TaskEvent) => {
+    // Create notification, refresh task list
+  });
+  return () => unsubscribe();
+}, []);
+```
+
+### Chat API Response Types
+
+```typescript
+// frontend/src/lib/chat-api.ts
+interface TaskResult {
+  id: string;
+  title: string;
+  completed?: boolean;
+}
+
+interface ActionResult {
+  success: boolean;
+  task?: TaskResult;
+  tasks?: TaskResult[];
+  deleted?: TaskResult[];
+  message?: string;
+}
+
+interface ActionTaken {
+  tool: string;
+  input: Record<string, unknown>;
+  result: ActionResult;
+}
+```
+
+### Notification Component
+
+Color-coded pill badges with fade-away animation:
+- Green (`added`) - New task created
+- Blue (`completed`) - Task marked complete
+- Yellow (`updated`) - Task modified
+- Red (`deleted`) - Task removed
+
+```typescript
+// Usage in TaskItem
+{notification && (
+  <TaskNotification
+    message={notification.message}
+    type={notification.type}
+  />
+)}
+```
+
+### Tailwind Animation Config
+
+```typescript
+// frontend/tailwind.config.ts
+theme: {
+  extend: {
+    keyframes: {
+      'slide-in': {
+        '0%': { opacity: '0', transform: 'translateX(-10px)' },
+        '100%': { opacity: '1', transform: 'translateX(0)' },
+      },
+    },
+    animation: {
+      'slide-in': 'slide-in 0.3s ease-out',
+    },
+  },
+}
+```
+
+### Chat API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/chat` | Yes | Send chat message to AI agent |
+| GET | `/api/chat/history` | Yes | Get conversation history |
+| DELETE | `/api/chat/history` | Yes | Clear conversation history |
+
+### Key Files - Phase 3
+
+| File | Purpose |
+|------|---------|
+| `frontend/src/lib/task-events.ts` | Event emitter singleton |
+| `frontend/src/lib/chat-api.ts` | Chat API client with types |
+| `frontend/src/components/Chat/ChatWidget.tsx` | Chat UI with event emission |
+| `frontend/src/components/TaskNotification.tsx` | Notification pill component |
+| `frontend/src/components/TaskItem.tsx` | Task item with notification |
+| `backend/app/routers/chat.py` | Chat API endpoint |
+| `backend/app/agent/` | AI agent implementation |
+| `backend/app/mcp/` | MCP tools for task operations |
+
+---
+
 ## Local Session Memory
 
 For session-specific context, status, and notes, see `CLAUDE.local.md` (git-ignored).

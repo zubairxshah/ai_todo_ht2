@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db_and_tables
-from app.routers import tasks
+from app.routers import tasks, chat
 
 app = FastAPI(
     title="Todo API",
-    description="Todo application backend with user ownership enforcement",
-    version="1.0.0",
+    description="Todo application backend with AI chatbot and user ownership enforcement",
+    version="2.0.0",
 )
 
 # Configure CORS for frontend
@@ -21,6 +21,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tasks.router)
+app.include_router(chat.router)
 
 
 @app.on_event("startup")

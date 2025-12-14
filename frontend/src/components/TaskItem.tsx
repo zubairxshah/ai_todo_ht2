@@ -2,14 +2,25 @@
 
 import { useState } from "react";
 import type { Task } from "@/types";
+import TaskNotification from "./TaskNotification";
+import { TaskEventType } from "@/lib/task-events";
+
+interface TaskNotificationData {
+  id: string;
+  taskId: string;
+  type: TaskEventType;
+  message: string;
+  timestamp: number;
+}
 
 interface TaskItemProps {
   task: Task;
   onUpdate: (id: string, updates: Partial<Task>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  notification?: TaskNotificationData;
 }
 
-export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
+export default function TaskItem({ task, onUpdate, onDelete, notification }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [loading, setLoading] = useState(false);
@@ -90,6 +101,13 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
         >
           {task.title}
         </span>
+      )}
+
+      {notification && (
+        <TaskNotification
+          message={notification.message}
+          type={notification.type}
+        />
       )}
 
       <div className="flex gap-2">

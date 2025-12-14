@@ -11,6 +11,8 @@ engine = create_engine(
 
 
 def create_db_and_tables() -> None:
+    # Import models to register them with SQLModel metadata
+    from app.models import Task, Conversation, Message  # noqa: F401
     SQLModel.metadata.create_all(engine)
 
 
