@@ -23,6 +23,49 @@ A full-stack Todo application built with Next.js and FastAPI.
 - Mark tasks as complete/incomplete
 - Inline task editing
 - User ownership enforcement (users can only access their own tasks)
+- **AI Chatbot** - Natural language task management via MCP tools
+- **Real-time notifications** - Toast notifications for task updates
+- **SSE Streaming** - Live chat responses with tool execution feedback
+
+## AI Chatbot (Phase III)
+
+The app includes an AI-powered chatbot that can manage your tasks through natural conversation.
+
+### Chat Commands Examples
+
+| You Say | AI Does |
+|---------|---------|
+| "Add buy groceries" | Creates a new task |
+| "Show my tasks" | Lists all your tasks |
+| "Show pending tasks" | Lists incomplete tasks |
+| "Mark groceries as done" | Completes the matching task |
+| "Delete the groceries task" | Removes the task |
+| "Rename groceries to buy vegetables" | Updates task title |
+
+### Demo
+
+**Adding a task via chat:**
+```
+User: Add a task to call mom tomorrow
+AI: Added task: 'call mom tomorrow'
+    You now have 3 tasks (2 pending, 1 completed).
+```
+
+**Listing tasks:**
+```
+User: Show my pending tasks
+AI: Your tasks:
+    1. [ ] Call mom tomorrow
+    2. [ ] Buy groceries
+    2 pending tasks.
+```
+
+**Completing a task:**
+```
+User: Mark call mom as done
+AI: Marked 'call mom tomorrow' as done!
+    You now have 1 pending task.
+```
 
 ## Setup
 
@@ -54,6 +97,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:3000
 ```
 DATABASE_URL=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require
 BETTER_AUTH_SECRET=your-shared-secret
+OPENAI_API_KEY=sk-proj-xxx  # Required for AI chatbot
 ```
 
 **Important**: `BETTER_AUTH_SECRET` must be the same in both frontend and backend.
@@ -82,15 +126,30 @@ Frontend runs at http://localhost:3000
 
 ## API Endpoints
 
+### Task Management
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /api/tasks | List user's tasks |
 | POST | /api/tasks | Create a task |
 | PATCH | /api/tasks/{id} | Update a task |
 | DELETE | /api/tasks/{id} | Delete a task |
-| GET | /health | Health check |
 
-All task endpoints require `Authorization: Bearer <token>` header.
+### AI Chat
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/chat | Send message to AI (JSON response) |
+| POST | /api/chatkit | Send message to AI (SSE streaming) |
+| GET | /api/chatkit/threads | List conversation threads |
+| GET | /api/chatkit/threads/{id} | Get thread with messages |
+| DELETE | /api/chatkit/threads/{id} | Delete a thread |
+
+### System
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /health | Health check |
+| * | /mcp | MCP Server (Streamable HTTP) |
+
+All endpoints (except /health and /mcp) require `Authorization: Bearer <token>` header.
 
 ## Docker Development
 
@@ -150,22 +209,39 @@ todo_p1/
 │   │   │   ├── dashboard/    # Task management (protected)
 │   │   │   ├── login/        # Login page
 │   │   │   └── register/     # Registration page
-│   │   ├── components/       # TaskForm, TaskList, TaskItem
-│   │   ├── lib/              # auth.ts, api.ts
+│   │   ├── components/
+│   │   │   ├── Chat/         # ChatWidget, ChatKitWidget
+│   │   │   ├── TaskForm.tsx
+│   │   │   ├── TaskList.tsx
+│   │   │   ├── TaskItem.tsx
+│   │   │   └── ToastNotification.tsx
+│   │   ├── lib/
+│   │   │   ├── auth.ts       # Better Auth client
+│   │   │   ├── api.ts        # REST API client
+│   │   │   ├── chat-api.ts   # Chat API client
+│   │   │   └── task-events.ts # Real-time event emitter
 │   │   └── types/            # TypeScript definitions
 │   ├── Dockerfile
 │   └── package.json
 ├── backend/                  # FastAPI application
 │   ├── app/
-│   │   ├── models/           # SQLModel models (Task)
-│   │   ├── routers/          # API endpoints (/api/tasks)
+│   │   ├── models/           # SQLModel models (Task, Message, Conversation)
+│   │   ├── routers/
+│   │   │   ├── tasks.py      # Task CRUD endpoints
+│   │   │   ├── chat.py       # AI chat endpoint (JSON)
+│   │   │   └── chatkit.py    # ChatKit SSE streaming
+│   │   ├── agent/            # AI agent implementation
+│   │   │   └── runner.py     # OpenAI function calling
+│   │   ├── mcp/              # MCP tools & server
+│   │   │   ├── tools.py      # Tool implementations
+│   │   │   └── server.py     # FastMCP server
 │   │   ├── dependencies/     # JWT auth verification
 │   │   └── schemas/          # Pydantic DTOs
 │   ├── tests/                # Pytest test suite
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── specs/                    # Specifications
-│   ├── features/             # Feature specs (auth, task-crud)
+│   ├── features/             # Feature specs (auth, task-crud, chatbot)
 │   ├── api/                  # REST endpoint documentation
 │   ├── database/             # Schema documentation
 │   └── todo-app/             # Main feature spec/plan/tasks
