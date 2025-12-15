@@ -86,8 +86,8 @@ async def chat(
     # Add new user message
     messages.append({"role": "user", "content": request.message})
 
-    # 4. Run agent with MCP tools
-    response_text, actions_taken = run_agent(messages, user_id)
+    # 4. Run agent with MCP tools (async)
+    response_text, actions_taken = await run_agent(messages, user_id)
 
     # 5. Store messages
     # Store user message

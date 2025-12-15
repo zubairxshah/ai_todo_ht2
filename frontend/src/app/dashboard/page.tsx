@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import type { Task } from "@/types";
 import TaskForm from "@/components/TaskForm";
 import TaskList from "@/components/TaskList";
-import { ChatWidget } from "@/components/Chat";
+import { ChatKitWidget } from "@/components/Chat";
 import { taskEvents, TaskEvent, TaskEventType } from "@/lib/task-events";
 import { ToastContainer } from "@/components/ToastNotification";
 
@@ -255,8 +255,8 @@ export default function DashboardPage() {
         </div>
       </footer>
 
-      {/* AI Chat Widget */}
-      {tokenReady && <ChatWidget />}
+      {/* AI Chat Widget (MCP + SSE Streaming) */}
+      {tokenReady && <ChatKitWidget />}
     </div>
   );
 }
