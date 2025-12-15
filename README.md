@@ -244,10 +244,126 @@ todo_p1/
 │   ├── features/             # Feature specs (auth, task-crud, chatbot)
 │   ├── api/                  # REST endpoint documentation
 │   ├── database/             # Schema documentation
+│   ├── infrastructure/       # K8s/Docker specs (Phase IV)
 │   └── todo-app/             # Main feature spec/plan/tasks
+├── helm/                     # Helm charts
+│   └── todo-chatbot/         # Main application chart
+│       ├── Chart.yaml        # Chart metadata
+│       ├── values.yaml       # Default values
+│       ├── values-dev.yaml   # Minikube overrides
+│       └── templates/        # K8s manifests
 ├── docker-compose.yml        # Dev environment orchestration
 ├── .env.example              # Environment template
 └── CLAUDE.md                 # AI assistant guidelines
+```
+
+## Kubernetes Deployment (Phase IV)
+
+Deploy the Todo AI Chatbot to a local Kubernetes cluster using Minikube and Helm.
+
+### Prerequisites
+
+```bash
+# Required tools
+docker --version      # Docker 24.x+
+minikube version      # Minikube 1.32.x+
+kubectl version       # kubectl 1.28.x+
+helm version          # Helm 3.14.x+
+
+# Optional (AI-assisted ops)
+kubectl krew install ai  # kubectl-ai for natural language K8s
+```
+
+### Quick Start with Minikube
+
+```bash
+# 1. Start Minikube cluster
+minikube start --driver=docker --memory=4096 --cpus=2
+
+# 2. Use Minikube's Docker daemon
+eval $(minikube docker-env)
+
+# 3. Build images
+docker build -t todo-frontend:latest ./frontend
+docker build -t todo-backend:latest ./backend
+
+# 4. Create namespace and deploy
+kubectl create namespace todo-chatbot
+
+# 5. Set your secrets
+export DATABASE_URL="postgresql://your-neon-connection-string"
+export BETTER_AUTH_SECRET="your-shared-secret"
+export OPENAI_API_KEY="sk-your-key"
+
+# 6. Install with Helm
+helm install todo-chatbot ./helm/todo-chatbot \
+  --namespace todo-chatbot \
+  --set secrets.databaseUrl="$DATABASE_URL" \
+  --set secrets.betterAuthSecret="$BETTER_AUTH_SECRET" \
+  --set secrets.openaiApiKey="$OPENAI_API_KEY"
+
+# 7. Access the application
+minikube service frontend -n todo-chatbot
+```
+
+### kubectl-ai Commands
+
+If you have kubectl-ai installed, use natural language for K8s operations:
+
+```bash
+# Check status
+kubectl ai "show me the status of all pods in todo-chatbot namespace"
+
+# Scale
+kubectl ai "scale the backend deployment to 2 replicas"
+
+# Troubleshoot
+kubectl ai "why is the backend pod not ready?"
+kubectl ai "show the last 50 lines of frontend logs"
+
+# Resources
+kubectl ai "show resource usage for all pods in todo-chatbot"
+```
+
+### Helm Commands
+
+```bash
+# Upgrade deployment
+helm upgrade todo-chatbot ./helm/todo-chatbot -n todo-chatbot
+
+# View status
+helm status todo-chatbot -n todo-chatbot
+
+# Uninstall
+helm uninstall todo-chatbot -n todo-chatbot
+
+# Lint chart
+helm lint ./helm/todo-chatbot
+```
+
+### Kubernetes Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Minikube Cluster                             │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                  todo-chatbot namespace                    │  │
+│  │                                                            │  │
+│  │  ┌─────────────────┐        ┌─────────────────┐           │  │
+│  │  │  Frontend Pod   │        │  Backend Pod    │           │  │
+│  │  │  (Next.js)      │───────▶│  (FastAPI)      │           │  │
+│  │  │  NodePort:30000 │        │  ClusterIP:8000 │           │  │
+│  │  └─────────────────┘        └────────┬────────┘           │  │
+│  │                                      │                     │  │
+│  │  ┌─────────────────────────────────────────────────────┐  │  │
+│  │  │                    Secrets                           │  │  │
+│  │  │  DATABASE_URL | BETTER_AUTH_SECRET | OPENAI_API_KEY │  │  │
+│  │  └─────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                   Neon PostgreSQL (Cloud)
 ```
 
 ## Security
@@ -256,3 +372,5 @@ todo_p1/
 - JWT tokens verified with shared secret
 - User ownership enforced on all task operations
 - CORS configured for frontend origin only
+- **K8s secrets** for sensitive data in deployments
+- **Non-root containers** for security hardening

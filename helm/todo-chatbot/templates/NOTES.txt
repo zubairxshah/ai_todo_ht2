@@ -1,0 +1,69 @@
+================================================================================
+  Todo AI Chatbot - Deployment Complete!
+================================================================================
+
+Thank you for installing {{ .Chart.Name }}!
+
+Your Todo AI Chatbot is now deployed to Kubernetes.
+
+--------------------------------------------------------------------------------
+1. ACCESS THE APPLICATION
+--------------------------------------------------------------------------------
+
+{{- if eq .Values.frontend.service.type "NodePort" }}
+Using Minikube:
+  minikube service {{ .Values.frontend.name }} --namespace {{ .Release.Namespace }} --url
+
+Or get the URL manually:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ .Values.frontend.name }})
+  export NODE_IP=$(minikube ip)
+  echo "Frontend URL: http://$NODE_IP:$NODE_PORT"
+{{- else }}
+  kubectl port-forward svc/{{ .Values.frontend.name }} 3000:{{ .Values.frontend.service.port }} --namespace {{ .Release.Namespace }}
+  Then open: http://localhost:3000
+{{- end }}
+
+--------------------------------------------------------------------------------
+2. CHECK POD STATUS
+--------------------------------------------------------------------------------
+
+Watch pods:
+  kubectl get pods --namespace {{ .Release.Namespace }} -w
+
+Check all resources:
+  kubectl get all --namespace {{ .Release.Namespace }}
+
+--------------------------------------------------------------------------------
+3. VIEW LOGS
+--------------------------------------------------------------------------------
+
+Frontend logs:
+  kubectl logs -l app.kubernetes.io/name={{ .Values.frontend.name }} --namespace {{ .Release.Namespace }} -f
+
+Backend logs:
+  kubectl logs -l app.kubernetes.io/name={{ .Values.backend.name }} --namespace {{ .Release.Namespace }} -f
+
+--------------------------------------------------------------------------------
+4. TROUBLESHOOT WITH kubectl-ai
+--------------------------------------------------------------------------------
+
+If you have kubectl-ai installed, try these commands:
+
+  kubectl ai "show me the status of all pods in {{ .Release.Namespace }}"
+  kubectl ai "why is the backend pod not ready?"
+  kubectl ai "show the last 50 lines of frontend logs"
+  kubectl ai "scale the backend deployment to 2 replicas"
+
+--------------------------------------------------------------------------------
+5. USEFUL COMMANDS
+--------------------------------------------------------------------------------
+
+Upgrade deployment:
+  helm upgrade {{ .Release.Name }} ./helm/todo-chatbot --namespace {{ .Release.Namespace }}
+
+Uninstall:
+  helm uninstall {{ .Release.Name }} --namespace {{ .Release.Namespace }}
+
+--------------------------------------------------------------------------------
+Enjoy your AI-powered task management! 🚀
+================================================================================

@@ -1,0 +1,53 @@
+# =============================================================================
+# Todo Chatbot Helm Chart - Development/Minikube Values
+# =============================================================================
+# Use with: helm install todo-chatbot ./helm/todo-chatbot -f values-dev.yaml
+
+# -----------------------------------------------------------------------------
+# Frontend - Lower resources for Minikube
+# -----------------------------------------------------------------------------
+frontend:
+  replicaCount: 1
+
+  service:
+    type: NodePort
+    nodePort: 30000
+
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+# -----------------------------------------------------------------------------
+# Backend - Lower resources for Minikube
+# -----------------------------------------------------------------------------
+backend:
+  replicaCount: 1
+
+  env:
+    WORKERS: "1"
+
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+# -----------------------------------------------------------------------------
+# Secrets - Set via --set flags or environment variables
+# -----------------------------------------------------------------------------
+# Example:
+#   export DATABASE_URL="postgresql://..."
+#   export BETTER_AUTH_SECRET="your-secret"
+#   export OPENAI_API_KEY="sk-..."
+#
+#   helm install todo-chatbot ./helm/todo-chatbot \
+#     -f values-dev.yaml \
+#     --set secrets.databaseUrl="$DATABASE_URL" \
+#     --set secrets.betterAuthSecret="$BETTER_AUTH_SECRET" \
+#     --set secrets.openaiApiKey="$OPENAI_API_KEY"

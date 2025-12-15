@@ -1,0 +1,108 @@
+# =============================================================================
+# Todo Chatbot Helm Chart - Default Values
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Global Settings
+# -----------------------------------------------------------------------------
+global:
+  namespace: todo-chatbot
+  imagePullPolicy: IfNotPresent
+
+# -----------------------------------------------------------------------------
+# Frontend Configuration (Next.js)
+# -----------------------------------------------------------------------------
+frontend:
+  name: frontend
+  replicaCount: 1
+
+  image:
+    repository: todo-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30000
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  env:
+    NEXT_PUBLIC_API_URL: "http://backend:8000"
+    NEXT_PUBLIC_AUTH_URL: "http://localhost:30000"
+
+  healthCheck:
+    path: /
+    port: 3000
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+# -----------------------------------------------------------------------------
+# Backend Configuration (FastAPI)
+# -----------------------------------------------------------------------------
+backend:
+  name: backend
+  replicaCount: 1
+
+  image:
+    repository: todo-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  env:
+    WORKERS: "2"
+    AUTH_URL: "http://frontend:3000"
+
+  healthCheck:
+    path: /health
+    port: 8000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+# -----------------------------------------------------------------------------
+# Secrets Configuration
+# Override these values at install time:
+#   --set secrets.databaseUrl="postgresql://..."
+#   --set secrets.betterAuthSecret="your-secret"
+#   --set secrets.openaiApiKey="sk-..."
+# -----------------------------------------------------------------------------
+secrets:
+  databaseUrl: ""
+  betterAuthSecret: ""
+  openaiApiKey: ""
+
+# -----------------------------------------------------------------------------
+# Ingress Configuration (Optional - for production)
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: todo.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend

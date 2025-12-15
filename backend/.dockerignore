@@ -1,0 +1,53 @@
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv
+.venv
+env
+.env
+
+# Environment files
+.env*
+*.env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Tests
+tests
+test_*.py
+*_test.py
+conftest.py
+.pytest_cache
+.coverage
+htmlcov
+coverage.xml
+
+# Documentation
+*.md
+docs
+
+# Build artifacts
+*.egg-info
+dist
+build
+
+# Misc
+.DS_Store
+*.log

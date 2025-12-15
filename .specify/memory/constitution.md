@@ -115,6 +115,33 @@ NEXT_PUBLIC_API_URL=<backend-api-url>
 - All tests MUST pass before merge
 - Type checking MUST pass with no errors
 
+### V. Containerization Best Practices (Phase IV)
+
+Production containers MUST follow cloud-native standards.
+
+- Dockerfiles MUST use multi-stage builds to minimize image size
+- Images MUST run as non-root users for security
+- Images MUST include HEALTHCHECK directives for K8s probes
+- Secrets MUST NEVER be baked into images; inject via environment/K8s secrets
+- Base images MUST be minimal (alpine/slim variants)
+- `.dockerignore` files MUST exclude dev artifacts, tests, and secrets
+
+**Rationale**: Minimal, secure containers reduce attack surface, improve startup time,
+and follow the principle of least privilege required for production workloads.
+
+### VI. AI-Assisted Operations
+
+Leverage AI tools for intelligent infrastructure operations.
+
+- Use **Gordon** (Docker AI) for Dockerfile optimization when available
+- Use **kubectl-ai** for natural language Kubernetes operations
+- Use **kagent** for agentic cluster analysis and recommendations
+- Document AI-generated outputs for reproducibility
+- Fallback to Claude-generated alternatives when AI tools unavailable
+
+**Rationale**: AI-assisted ops accelerate development, reduce human error, and provide
+intelligent insights that would otherwise require deep expertise.
+
 ## Development Workflow
 
 ### Branching Strategy
@@ -144,4 +171,4 @@ A task is complete when:
 - All PRs MUST verify compliance with this constitution
 - The constitution supersedes all other development practices
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-14 | **Last Amended**: 2025-12-14
+**Version**: 1.1.0 | **Ratified**: 2025-12-14 | **Last Amended**: 2025-12-15

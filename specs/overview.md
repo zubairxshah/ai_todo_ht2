@@ -22,7 +22,7 @@ A full-stack Todo application that allows users to manage their personal tasks w
 
 ## Core Features
 
-### Phase I & II: Foundation
+### Phase I & II: Foundation (Complete)
 
 1. **User Authentication**
    - Registration with email/password
@@ -42,7 +42,7 @@ A full-stack Todo application that allows users to manage their personal tasks w
    - All secrets loaded from environment variables
    - CORS configured for frontend origin only
 
-### Phase III: AI Chatbot
+### Phase III: AI Chatbot (Complete)
 
 4. **Natural Language Interface**
    - Add tasks via conversation ("Add buy groceries")
@@ -61,6 +61,26 @@ A full-stack Todo application that allows users to manage their personal tasks w
    - Persistent conversation storage
    - Message history retrieval
    - Conversation context continuity
+
+### Phase IV: Kubernetes Deployment
+
+7. **Containerization**
+   - Production-ready multi-stage Dockerfiles
+   - Optimized image sizes (< 200MB frontend, < 300MB backend)
+   - Non-root user execution
+   - Health checks for K8s probes
+
+8. **Helm Chart**
+   - Complete Helm chart for application deployment
+   - Configurable values for dev/prod environments
+   - Secret management via K8s secrets
+   - Service definitions (NodePort/ClusterIP)
+
+9. **Local Kubernetes**
+   - Minikube single-node cluster
+   - Docker Desktop driver integration
+   - kubectl-ai for natural language operations
+   - kagent for agentic K8s management
 
 ## Project Structure
 
@@ -81,7 +101,10 @@ todo_p1/
 │   ├── api/            # API documentation
 │   ├── database/       # Database schemas
 │   ├── mcp/            # MCP tool specifications
+│   ├── infrastructure/ # K8s/Docker specs (Phase IV)
 │   └── todo-app/       # Main feature spec
+├── helm/               # Helm charts
+│   └── todo-chatbot/   # Main application chart
 ├── history/            # Prompt history records
 └── .spec-kit/          # SpecKit configuration
 ```
@@ -103,3 +126,11 @@ See [README.md](../README.md) for setup instructions.
 - [Chat API](./api/chat-endpoint.md) - Chat endpoint specification
 - [MCP Tools](./mcp/tools.md) - MCP tool definitions
 - [Conversation Schema](./database/conversation-schema.md) - Database models
+
+### Phase IV Specs
+
+- [Docker Containerization](./infrastructure/docker.md) - Dockerfile patterns and Gordon AI
+- [Helm Chart](./infrastructure/helm-chart.md) - K8s deployment chart
+- [Deployment Guide](./infrastructure/deployment.md) - Minikube setup and AI ops
+- [Implementation Tasks](./infrastructure/tasks.md) - Sequential task breakdown
+- [Implementation Plan](./phase4-implementation-plan.md) - Full step-by-step plan
