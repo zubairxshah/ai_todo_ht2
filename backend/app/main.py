@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db_and_tables
-from app.routers import tasks, chat, chatkit
+from app.routers import tasks, tags, chat, chatkit
 from app.mcp.server import mcp_lifespan, get_mcp_app
 
 
@@ -57,6 +57,7 @@ app.add_middleware(
 
 # Include REST API routers
 app.include_router(tasks.router)
+app.include_router(tags.router)
 app.include_router(chat.router)
 app.include_router(chatkit.router)
 

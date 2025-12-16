@@ -1,4 +1,13 @@
-import type { Task, TaskCreate, TaskUpdate } from "@/types";
+import type {
+  Task,
+  TaskCreate,
+  TaskUpdate,
+  TaskFilterParams,
+  Tag,
+  TagCreate,
+  TagUpdate,
+  TagWithCount,
+} from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -48,9 +57,44 @@ class ApiClient {
     return response.json();
   }
 
+  // Build query string from filter params
+  private buildQueryString(params: TaskFilterParams): string {
+    const searchParams = new URLSearchParams();
+
+    if (params.status && params.status !== "all") {
+      searchParams.append("status", params.status);
+    }
+    if (params.priority !== undefined) {
+      searchParams.append("priority", params.priority.toString());
+    }
+    if (params.tag_id) {
+      searchParams.append("tag_id", params.tag_id);
+    }
+    if (params.search) {
+      searchParams.append("search", params.search);
+    }
+    if (params.overdue) {
+      searchParams.append("overdue", "true");
+    }
+    if (params.sort_by) {
+      searchParams.append("sort_by", params.sort_by);
+    }
+    if (params.sort_order) {
+      searchParams.append("sort_order", params.sort_order);
+    }
+
+    const queryString = searchParams.toString();
+    return queryString ? `?${queryString}` : "";
+  }
+
   // Task operations
-  async getTasks(): Promise<Task[]> {
-    return this.request<Task[]>("/api/tasks");
+  async getTasks(filters?: TaskFilterParams): Promise<Task[]> {
+    const query = filters ? this.buildQueryString(filters) : "";
+    return this.request<Task[]>(`/api/tasks${query}`);
+  }
+
+  async getTask(id: string): Promise<Task> {
+    return this.request<Task>(`/api/tasks/${id}`);
   }
 
   async createTask(data: TaskCreate): Promise<Task> {
@@ -69,6 +113,35 @@ class ApiClient {
 
   async deleteTask(id: string): Promise<void> {
     return this.request<void>(`/api/tasks/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Tag operations
+  async getTags(): Promise<TagWithCount[]> {
+    return this.request<TagWithCount[]>("/api/tags");
+  }
+
+  async getTag(id: string): Promise<TagWithCount> {
+    return this.request<TagWithCount>(`/api/tags/${id}`);
+  }
+
+  async createTag(data: TagCreate): Promise<Tag> {
+    return this.request<Tag>("/api/tags", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTag(id: string, data: TagUpdate): Promise<Tag> {
+    return this.request<Tag>(`/api/tags/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteTag(id: string): Promise<void> {
+    return this.request<void>(`/api/tags/${id}`, {
       method: "DELETE",
     });
   }

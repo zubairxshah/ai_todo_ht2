@@ -134,3 +134,14 @@ See [README.md](../README.md) for setup instructions.
 - [Deployment Guide](./infrastructure/deployment.md) - Minikube setup and AI ops
 - [Implementation Tasks](./infrastructure/tasks.md) - Sequential task breakdown
 - [Implementation Plan](./phase4-implementation-plan.md) - Full step-by-step plan
+
+### Phase V Specs
+
+- [Overview](./phase5/overview.md) - Phase V architecture and objectives
+- [Advanced Features](./phase5/features/advanced-features.md) - Due dates, priorities, tags, recurring tasks
+- [Database Schema](./phase5/features/database-schema.md) - Schema migrations and models
+- [Dapr Integration](./phase5/infrastructure/dapr.md) - Distributed application runtime
+- [Kafka Architecture](./phase5/infrastructure/kafka.md) - Event-driven architecture
+- [Cloud Deployment](./phase5/infrastructure/cloud-deployment.md) - AKS/GKE/OKE setup
+- [CI/CD Pipeline](./phase5/infrastructure/cicd.md) - GitHub Actions workflow
+- [Implementation Tasks](./phase5/tasks.md) - 50 sequential tasks
