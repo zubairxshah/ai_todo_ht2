@@ -91,3 +91,13 @@ export const PRIORITY_COLORS: Record<number, string> = {
   2: "text-yellow-600 bg-yellow-50 border-yellow-200",
   3: "text-green-600 bg-green-50 border-green-200",
 };
+
+// T039: Export voice types
+export type {
+  VoiceStatus,
+  VoiceErrorCode,
+  VoiceError,
+  VoiceState,
+  VoiceInputConfig,
+  VoiceInputHookReturn,
+} from './voice';

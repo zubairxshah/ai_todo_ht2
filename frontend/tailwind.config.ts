@@ -33,6 +33,15 @@ const config: Config = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' },
         },
+        'voice-pulse': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.05)', opacity: '0.8' },
+        },
+        'voice-error-shake': {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-2px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(2px)' },
+        },
       },
       animation: {
         'slide-in': 'slide-in 0.3s ease-out',
@@ -41,6 +50,8 @@ const config: Config = {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 3s ease-in-out infinite',
+        'voice-pulse': 'voice-pulse 1.5s ease-in-out infinite',
+        'voice-error-shake': 'voice-error-shake 0.5s ease-in-out',
       },
     },
   },

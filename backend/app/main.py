@@ -17,7 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db_and_tables
-from app.routers import tasks, tags, chat, chatkit
+from app.routers import tasks, tags, chat, chatkit, transcription
 from app.mcp.server import mcp_lifespan, get_mcp_app
 
 
@@ -51,11 +51,12 @@ app = FastAPI(
 # Allow both local development and production URLs
 cors_origins = [
     "http://localhost:3000",  # Local development
+    "https://ai-todo-ht2.vercel.app",  # Vercel production
 ]
 
-# Add production frontend URL from environment
+# Add additional frontend URL from environment if provided
 frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
+if frontend_url and frontend_url not in cors_origins:
     cors_origins.append(frontend_url)
     # Also allow without trailing slash
     cors_origins.append(frontend_url.rstrip("/"))
@@ -74,6 +75,7 @@ app.include_router(tasks.router)
 app.include_router(tags.router)
 app.include_router(chat.router)
 app.include_router(chatkit.router)
+app.include_router(transcription.router)
 
 # Mount MCP server at /mcp endpoint
 # This enables tool discovery via Model Context Protocol (Streamable HTTP transport)

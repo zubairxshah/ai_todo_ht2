@@ -444,3 +444,10 @@ This file contains:
 - Quick start commands
 - Session history and debugging notes
 - Test credentials and commands
+
+## Active Technologies
+- TypeScript 5.x (frontend), Python 3.11+ (backend) (001-divi-voice-chatbot)
+- N/A (voice data is ephemeral, not stored) (001-divi-voice-chatbot)
+
+## Recent Changes
+- 001-divi-voice-chatbot: Added TypeScript 5.x (frontend), Python 3.11+ (backend)

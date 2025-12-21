@@ -15,6 +15,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { taskEvents } from '@/lib/task-events';
+import { VoiceInput } from './VoiceInput';
+import { VoiceIndicator } from './VoiceIndicator';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface Message {
   id: string;
@@ -78,6 +81,23 @@ export default function ChatKitWidget() {
   const [streamingContent, setStreamingContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // T014-T015: Voice input integration
+  const handleVoiceTranscription = useCallback((text: string) => {
+    console.log('🎤 [CHAT] handleVoiceTranscription called with:', text);
+    // T016: Set input from voice and auto-submit
+    setInput(text);
+    // Auto-submit after a short delay to allow user to see the transcription
+    setTimeout(() => {
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      document.querySelector('form')?.dispatchEvent(submitEvent);
+    }, 500);
+  }, []);
+
+  console.log('🎤 [CHAT] Calling useVoiceInput with handleVoiceTranscription:', !!handleVoiceTranscription);
+  const { state: voiceState } = useVoiceInput({
+    silenceTimeout: 5000  // Wait 5 seconds of silence before stopping
+  }, handleVoiceTranscription);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -387,6 +407,15 @@ export default function ChatKitWidget() {
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200/50 bg-white/80 backdrop-blur-sm">
+            {/* T015: Voice indicator */}
+            {voiceState.status !== 'idle' && (
+              <div className="mb-2">
+                <VoiceIndicator
+                  status={voiceState.status}
+                  message={voiceState.error?.message}
+                />
+              </div>
+            )}
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -394,6 +423,11 @@ export default function ChatKitWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
                 className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent bg-white/80 transition-all"
+                disabled={loading}
+              />
+              {/* T014: Voice input button */}
+              <VoiceInput
+                onTranscription={handleVoiceTranscription}
                 disabled={loading}
               />
               <button
