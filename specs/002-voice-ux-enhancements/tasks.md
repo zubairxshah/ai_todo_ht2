@@ -68,10 +68,10 @@
 ### Implementation for User Story 3
 
 - [x] T010 [US3] Check git status for uncommitted changes
-- [ ] T011 [US3] Stage and commit all changes with descriptive commit message
-- [ ] T012 [US3] Push changes to remote repository (origin)
-- [ ] T013 [US3] Verify Vercel deployment triggered and succeeds
-- [ ] T014 [US3] Manual test: Access production URL and verify favicon + voice work
+- [x] T011 [US3] Stage and commit all changes with descriptive commit message
+- [x] T012 [US3] Push changes to remote repository (origin)
+- [ ] T013 [US3] Verify Vercel deployment triggered and succeeds (user to verify)
+- [ ] T014 [US3] Manual test: Access production URL and verify favicon + voice work (user to verify)
 
 **Checkpoint**: All changes deployed and verified in production
 
