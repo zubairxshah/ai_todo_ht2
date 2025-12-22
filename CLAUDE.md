@@ -448,6 +448,8 @@ This file contains:
 ## Active Technologies
 - TypeScript 5.x (frontend), Python 3.11+ (backend) (001-divi-voice-chatbot)
 - N/A (voice data is ephemeral, not stored) (001-divi-voice-chatbot)
+- TypeScript 5.x (Next.js 14 App Router) + React 18, Next.js 14, Web Speech API (browser native) (002-voice-ux-enhancements)
+- N/A (no database changes) (002-voice-ux-enhancements)
 
 ## Recent Changes
 - 001-divi-voice-chatbot: Added TypeScript 5.x (frontend), Python 3.11+ (backend)

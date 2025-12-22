@@ -82,23 +82,6 @@ export default function ChatKitWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // T014-T015: Voice input integration
-  const handleVoiceTranscription = useCallback((text: string) => {
-    console.log('🎤 [CHAT] handleVoiceTranscription called with:', text);
-    // T016: Set input from voice and auto-submit
-    setInput(text);
-    // Auto-submit after a short delay to allow user to see the transcription
-    setTimeout(() => {
-      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-      document.querySelector('form')?.dispatchEvent(submitEvent);
-    }, 500);
-  }, []);
-
-  console.log('🎤 [CHAT] Calling useVoiceInput with handleVoiceTranscription:', !!handleVoiceTranscription);
-  const { state: voiceState } = useVoiceInput({
-    silenceTimeout: 5000  // Wait 5 seconds of silence before stopping
-  }, handleVoiceTranscription);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -114,9 +97,9 @@ export default function ChatKitWidget() {
     return null;
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
+  // T002: Extracted submission logic for reuse by voice and text input
+  const submitMessage = useCallback(async (content: string) => {
+    if (!content.trim() || loading) return;
 
     const token = getToken();
     if (!token) {
@@ -127,12 +110,11 @@ export default function ChatKitWidget() {
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: input.trim(),
+      content: content.trim(),
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
     setLoading(true);
     setError(null);
     setStreamingContent('');
@@ -244,6 +226,31 @@ export default function ChatKitWidget() {
       setLoading(false);
       abortControllerRef.current = null;
     }
+  }, [loading, getToken, threadId]);
+
+  // T002-T005: Voice input integration - direct submission without populating input field
+  const handleVoiceTranscription = useCallback((text: string) => {
+    console.log('🎤 [CHAT] handleVoiceTranscription called with:', text);
+    // T003-T005: Direct submission without setInput - voice commands bypass input field
+    if (!text.trim()) {
+      console.log('🎤 [CHAT] Empty transcription, skipping submission');
+      return;
+    }
+    // Submit directly without populating input field or delay
+    submitMessage(text);
+  }, [submitMessage]);
+
+  const { state: voiceState } = useVoiceInput({
+    silenceTimeout: 5000  // Wait 5 seconds of silence before stopping
+  }, handleVoiceTranscription);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const messageContent = input.trim();
+    setInput('');
+    await submitMessage(messageContent);
   };
 
   const handleNewChat = () => {
